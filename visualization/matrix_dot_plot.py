@@ -7,7 +7,7 @@ from parameters import TOOLS
 def matrix_dot_plot():
 
     criteria = [
-        "Pseudobulk performance", "Real data performance",
+        "Pseudobulk performance", "HGSOC performance",
         "Computational cost", "Usability"
     ]
 
@@ -18,15 +18,15 @@ def matrix_dot_plot():
         [0, .5, .5, .5],  # Crosscheck
         [.5, 0, .5, .5],  # HYSYS
         [1, 1, .5, 1],  # NGSCheckMate
-        [1, .5, 1, .5],  # ntsm
-        [.5, .5, .5, 0],  # OmicsPrint
+        [1, .5, 1, 1],  # ntsm
+        [.5, .5, .5, .5],  # OmicsPrint
         [1, 1, .5, .5],  # Peddy
-        [0, 0, 1, .5],  # Somalier
-        [.5, 0, .5, 0],  # TimeAttack
+        [0, 0, 1, 1],  # Somalier
+        [.5, 0, .5, .5],  # TimeAttack
         [1, .5, .5, .5],  # Vireo
     ])
 
-    fig, ax = plt.subplots(figsize=(8, 7))
+    fig, ax = plt.subplots(figsize=(7, 7))
 
     # Horizontal guide lines
     for y in range(len(TOOLS)):
