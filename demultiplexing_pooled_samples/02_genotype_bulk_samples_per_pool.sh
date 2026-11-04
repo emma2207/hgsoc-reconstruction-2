@@ -11,16 +11,14 @@
 #SBATCH --job-name=bcftools
 #SBATCH --output=02_bcftools_%A_%a.log
 #SBATCH --error=02_bcftools_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load bcftools/1.16
 
 export pool=$SLURM_ARRAY_TASK_ID
-data_type=$1  # "diss_bulk" or "bulk"
+data_type=$1  # "diss_bulk_polyA" or "bulk_chunk_ribo"
 pool_csv=$2  # CSV file containing samples per pool
 
-# Script location is /scratch/alpine/${USER}/hgsoc/pooled
+# Script location is /scratch/alpine/${USER}/hgsoc/demultiplexing
 original_location=`pwd`
 index_location="/projects/${USER}/hgsoc/refdata-gex-GRCh38-2024-A"
 bulk_bam_location="/scratch/alpine/${USER}/hgsoc/bulk"
@@ -60,7 +58,7 @@ samples_230626=("2216" "2221" "2230" "2238" "2246" \
 bam_files=()
 for sample in "${sample_array[@]}"
 do
-	if [[ "$data_type" == "diss_bulk" ]]; then
+	if [[ "$data_type" == "diss_bulk_polyA" ]]; then
 		if [[ " ${samples_230414[*]} " =~ " ${sample} " ]]; then
 			bam_files+=("${bulk_bam_location}/230414/${sample}/STAR/Aligned.sortedByCoord.out.bam")
 		elif [[ " ${samples_230418[*]} " =~ " ${sample} " ]]; then
@@ -68,7 +66,7 @@ do
 		else
 			echo "Sample ${sample} not found in dissociated bulk."
 		fi
-	elif [[ "$data_type" == "bulk" ]]; then
+	elif [[ "$data_type" == "bulk_chunk_ribo" ]]; then
 		if [[ " ${samples_230509[*]} " =~ " $sample " ]]; then
 			bam_files+=("${bulk_bam_location}/230509/${sample}/STAR/Aligned.sortedByCoord.out.bam")
 		elif [[ " ${samples_230626[*]} " =~ " $sample " ]]; then
@@ -77,7 +75,7 @@ do
 			echo "Sample ${sample} not found in bulk."
 		fi
 	else
-		echo "Invalid data type: ${data_type}. Use 'diss_bulk' or 'bulk'."
+		echo "Invalid data type: ${data_type}. Use 'diss_bulk_polyA' or 'bulk_chunk_ribo'."
 		exit 1
 	fi
 done

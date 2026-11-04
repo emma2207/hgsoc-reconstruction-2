@@ -11,14 +11,12 @@
 #SBATCH --job-name=merge_pooled_bam
 #SBATCH --output=merge_pooled_bam_%A_%a.log
 #SBATCH --error=merge_pooled_bam_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load samtools/1.16.1
 
 export pool=$SLURM_ARRAY_TASK_ID
 
-# Script location is /scratch/alpine/$USER/hgsoc/pooled
+# Script location is /scratch/alpine/$USER/hgsoc/demultiplexing
 original_location=$(pwd)
 sample_alignment_location="$original_location/cellranger/pool$pool/outs/per_sample_outs"
 unassigned_location="$original_location/cellranger/pool$pool/outs/multi/count"

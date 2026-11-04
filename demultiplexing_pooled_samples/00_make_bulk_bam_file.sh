@@ -11,8 +11,6 @@
 #SBATCH --job-name=star
 #SBATCH --output=01_make_bam_file_%A_%a.log
 #SBATCH --error=01_make_bam_file_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load star/2.7.10b
 module load samtools/1.16.1
@@ -23,7 +21,7 @@ export taskID=$SLURM_ARRAY_TASK_ID
 # Original location is /scratch/alpine/${USER}/hgsoc/bulk
 original_location=`pwd`
 index_location="/projects/${USER}/hgsoc/refdata-gex-GRCh38-2024-A/star"
-pl_location = "/pl/active/cgreene-sc-hgsoc"
+pl_location="/pl/active/cgreene-sc-hgsoc"
 
 if [[ "${folder}" == "230414" ]]; then
     fastq_location="${pl_location}/ariel_sc_HGSOC/HippenA_230414_A00901_0909_BH3FJ2DRX3"

@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import sys
 
 def split_barcodes(pool: int):
     """
@@ -11,8 +12,8 @@ def split_barcodes(pool: int):
     Output:
     CSV files containing barcodes for each sample in the specified pool.
     """
-    
-    barcode_dir = f"/projects/elathouwers@xsede.org/hgsoc/pooled/vireo_bulk/pool{pool}/"
+
+    barcode_dir = f"/scratch/alpine/elathouwers@xsede.org/hgsoc/demultiplexing/results/vireo/pool{pool}/"
     df = pd.read_csv(barcode_dir + "donor_ids.tsv", delimiter="\t")
     df = df[["cell", "donor_id"]]
 
@@ -23,7 +24,7 @@ def split_barcodes(pool: int):
         barcode_lst = df_sample["cell"].reset_index(drop=True)
         print(f"Found {len(barcode_lst)} barcodes for sample {s}.")
 
-        short_sample_name = s.split("/")[1] if "/" in s else s
+        short_sample_name = s.split("_")[0]
         file_path = f"{os.getcwd()}/htseq-count/pool{pool}/{short_sample_name}"
         os.makedirs(file_path, exist_ok=True)
         barcode_lst.to_csv(file_path + "/barcodes_per_sample.csv", index=False, header=False)

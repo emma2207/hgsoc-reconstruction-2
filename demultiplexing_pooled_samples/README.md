@@ -3,11 +3,11 @@
 ## General pipeline comments 
 
 - This pipeline, specifically the shell scripts, is based on the [Greenelab deconvolution pilot repo](https://github.com/greenelab/deconvolution_pilot).
-- All scripts are ran from `/scratch/alpine/$USER/hgsoc/pooled` unless otherwise specified.
+- All scripts are ran from `/scratch/alpine/$USER/hgsoc/demultiplexing` unless otherwise specified.
 - The general directory structure is `program/pool$pool/output_files`, e.g. `bcftools/pool3/bcftools_pool3.vcf`.
-- All scripts are parallelized using slurm job arrays.
+- Most scripts are parallelized using slurm job arrays.
 - The same human reference genome is used wherever a ref genome is required. We used GRCh38 (2024-A), downloaded from the [10x Genomics website](https://www.10xgenomics.com/support/software/cell-ranger/downloads#reference-downloads).
-- The `$data_type` parameter refers to `bulk` or `diss_bulk`.
+- The `$data_type` parameter refers to `bulk_chunk_ribo` or `diss_bulk_polyA`.
 
 
 ## 1. Genome alignment & hash demultiplexing
@@ -23,7 +23,7 @@ Using CellRanger to align the transcriptomic data with a reference genome and do
     - Make sure that wherever you're running the script that `cellranger/cellranger_input` exists and contains the input files.
     - The latest version of CellRanger is not available on Alpine by default. As of March 2025, they have version 7.1.0 installed. You can ask Alpine help to install the latest version (9.0.1) in your own project directory.
     - Using the `cellranger multi` command, we run the alignment and hash demultiplexing on Alpine with `01_alignment_and_hash_dmx.sh`.
-    - Make sure the script is located in `/scratch/alpine/$USER/hgsoc/pooled/cellranger` before starting the run.
+    - Make sure the script is located in `/scratch/alpine/$USER/hgsoc/demultiplexing/cellranger` before starting the run.
 
 
 ## 2. Genotyping bulk samples
@@ -31,13 +31,14 @@ Using CellRanger to align the transcriptomic data with a reference genome and do
 Using bcftools to genotype individual bulk tissue samples that were bulk sequenced.
 This assumes that the bulk RNA-seq data has been aligned already. 
 
-These bulk samples were previously aligned with STAR.
+These bulk samples were previously aligned with STAR (see ../pseudobulking)
 - Prepare csv with samples per pool:
     - Every row will have a label for each pool, e.g. "Pool1", followed by the sample names: `samples_per_pool.csv`.
     - We prepared one of these for each the bulk and dissociated bulk samples: `samples_per_pool_bulk.csv` and `samples_per_pool_diss_bulk.csv`.
 - Run `02_genotype_bulk_samples_per_pool.sh $data_type $samples_per_pool_csv` to genotype the (dissociated) bulk in groups that match the single-cell pooled samples, resulting in a .vcf file for each pool. 
-    - This script reads which samples below to each pool, figures out where the aligned transcriptomic data is stored, and then runs bcftools for each pool. 
+    - This script reads which samples belong to each pool, figures out where the aligned transcriptomic data is stored, and then runs bcftools for each pool. 
 - Run `02_genotype_bulk_samples_all.sh $data_type` to genotype all the (dissociated) bulk samples and gather the results in a single .vcf file.
+- Later on in the demultiplexing process, where we iteratively figured out which samples are in each pool, rather than having an exact shell script, we used bcftools via the command line to include or exclude samples from a reference.
 
 
 ## 3. Genotyping pooled single-cell samples
@@ -47,13 +48,12 @@ Using CellSNP-lite to genotype the pooled single-cell samples.
 - Use samtools to merge pooled bam files:
     - In step 1. CellRanger aligned the pooled single-cell data with the ref genome and split it into separate files for each (hash demultiplexed) sample and unassigned alignments. Before starting the genetics demultiplexing we combine these alignments into a single file. 
     - Run `03_merge_pooled_bam_files.sh`
-- Find (droplet) barcodes for each pool:
-    - This was available on petalibrary `/pl/active/cgreene-sc-hgsoc/ariel_sc_HGSOC/GreeneC_OrmanD_scV3_HM5CCDSX5_230201/Pool*-GEX*/outs/filtered_feature_bc_matrix/barcodes.tsv.gz`. There is a separate barcode file for each pool.
-    - Unzip the barcode file with `gunzip`.
-    - Rename to `barcodes_pool$pool.tsv` and gather in a single `barcodes` folder.
+- There is a separate barcode file for each pool.
+- We ended up doing the genotyping and demultiplexing twice. The first time we assumed we did not know which samples were in each pooled sample. Therefore, we genotyped without refs, then iteratively demultiplexed to figure out the samples in each pool. Then we went back and redid the genotyping with the knowledge of which samples are in each pool and then redid the demultiplexing on the newly genotyped samples.
+- In general, one could use either the dissociated bulk or the bulk chunk samples as references for demultiplexing. We went with the bulk chunk samples because we had better sample coverage that way (37 single-cell samples (pooled), 36 bulk chunk, 32 dissociated bulk).
 - Genotype single-cell samples using bulk genotypes as references:
     - CellSNP-lite is not available on Alpine by default. You have to install it in your own project directory first.
-    - Run `04_genotype_pooled_samples.sh $data_type` to use cellSNP-lite for single-cell genotyping.
+    - Run `04_genotype_pooled_samples.sh` to use cellSNP-lite for single-cell genotyping.
 - (Alternatively) genotype single-cell samples without bulk references:
     - Run `04_genotype_pooled_samples_no_ref.sh` to use cellSNP-lite for single-cell genotyping without using a reference.
 
@@ -63,11 +63,11 @@ Using CellSNP-lite to genotype the pooled single-cell samples.
 Using Vireo to genetically demultiplex the pooled samples 
 
 - Vireo is not available on Alpine by default. You have to install it in your own project directory first.
-- Run `05_genetic_dmx.sh $data_type` to use Vireo to demultiplex the samples.
-- (Alternatively) run `05_genetic_dmx_all_ref.sh` to use Vireo to demultiplex the samples without making any assumptions about which samples are pooled together by using all of the (dissociated) bulk samples as references.
+- Run `05_genetic_dmx.sh` to use Vireo to demultiplex the samples.
+- (Alternatively) run `05_genetic_dmx_bulk_all_ref.sh` to use Vireo to demultiplex the samples without making any assumptions about which samples are pooled together by using all of the (dissociated) bulk samples as references. You can exclude samples by listing them as the second argument.
 - Splitting the .bam files by sample (after demultiplexing)
-    - Run `split_barcodes.py` to split the csv files with barcodes of pooled single-cell RNA-seq samples into separate files based on the cell assignments from the genetic demultiplexing. Use `run_split_barcodes.py` to submit the job to the cluster.
-    - Run `split_bam_by_sample.sh` to split the pooled scRNA-seq .bam files by samples based on the cell barcodes that were assigned to specific samples in the previous step.
+    - Run `split_barcodes.py` to split the csv files with barcodes of pooled single-cell RNA-seq samples into separate files based on the cell assignments from the genetic demultiplexing. Use `06a_run_split_barcodes.sh` to submit the job to the cluster.
+    - Run `06b_split_bam_by_sample.sh` to split the pooled scRNA-seq .bam files by samples based on the cell barcodes that were assigned to specific samples in the previous step.
 - Count the reads per gene (per sample) using `htseq-count.sh`
 
 
@@ -78,7 +78,7 @@ Using Vireo to genetically demultiplex the pooled samples
     - `assignment_confidence_table.csv` from the cellranger output (step 1).
 - Compare the genetic demultiplexing results with bulk and dissociated bulk references: `bulk_vs_diss_bulk_ref_gex_dmx.ipynb`. The input data for this notebook (`donor_ids.tsv` files) are part of the output of Vireo (step 4). Two types of visualizations are produced:
     - Histogram of number of cells assigned to each sample for each reference
-    - Histogram and scatter plot comparing the number of assigned samples for bulk an dissociated bulk references
-    - Histogramsof the number of cells assigned to each sample, comparing different filters
+    - Histogram and scatter plot comparing the number of assigned samples for bulk and dissociated bulk references
+    - Histograms of the number of cells assigned to each sample, comparing different filters
 - `qc_bulk.ipynb` compare the number of variants of each sample before and after applying a quality filter. The input files are .vcf files obtained by running `bcftools` to split the .vcf files containing multiple samples into individual .vcf files: `split_bulk_vcf_files.sh`.
 - `match_sample_ids.ipynb` creates heatmap visualizations of how similar bulk and dissociated bulk samples are.

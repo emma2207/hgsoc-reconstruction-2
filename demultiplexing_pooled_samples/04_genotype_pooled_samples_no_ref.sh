@@ -11,24 +11,23 @@
 #SBATCH --job-name=cellsnp-lite
 #SBATCH --output=03_genotype_pooled_%A_%a.log
 #SBATCH --error=03_genotype_pooled_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load anaconda
 conda activate cellsnp-lite_install
 
 export pool=$SLURM_ARRAY_TASK_ID
 
-# Original location is /scratch/alpine/$USER/hgsoc/pooled
-mkdir -p cellSNP_no_ref/pool${pool}
+# Original location is /scratch/alpine/$USER/hgsoc/demultiplexing
+mkdir -p results/cellSNP_no_ref/pool${pool}
 
 original_location=$(pwd)
 pooled_bam_location="$original_location/bam/pool${pool}"
-output_location="$original_location/cellSNP_no_ref/pool${pool}"
+barcodes_zip=$(ls /pl/active/cgreene-sc-hgsoc/ariel_sc_HGSOC/pooled_sc/Pool${pool}-GEX-CaseyGreene-*/outs/raw_feature_bc_matrix/barcodes.tsv.gz)
+output_location="$original_location/results/cellSNP_no_ref/pool${pool}"
 
 cellsnp-lite \
 	-s $pooled_bam_location/pooled.bam \
-	-b barcodes/barcodes_pool${pool}.tsv \
+	-b "${barcodes_zip}" \
 	-O $output_location \
 	-p 20 \
 	--minMAF=0.1 \
