@@ -24,7 +24,7 @@ def split_barcodes(pool: int):
         barcode_lst = df_sample["cell"].reset_index(drop=True)
         print(f"Found {len(barcode_lst)} barcodes for sample {s}.")
 
-        short_sample_name = s.split("_ds")[0] if "_ds" in s else s
+        short_sample_name = s.split("_")[0]
         file_path = f"{os.getcwd()}/htseq-count/pool{pool}/{short_sample_name}"
         os.makedirs(file_path, exist_ok=True)
         barcode_lst.to_csv(file_path + "/barcodes_per_sample.csv", index=False, header=False)

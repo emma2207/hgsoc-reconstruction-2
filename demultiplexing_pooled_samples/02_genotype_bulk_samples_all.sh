@@ -15,14 +15,14 @@
 
 module load bcftools/1.16
 
-data_type=$1  # "diss_bulk" or "bulk"
+data_type=$1  # "diss_bulk_polyA" or "bulk_chunk_ribo"
 
 # Script location is /scratch/alpine/${USER}/hgsoc/demultiplexing
 original_location=`pwd`
 index_location="/projects/${USER}/hgsoc/refdata-gex-GRCh38-2024-A"
 bulk_bam_location="/scratch/alpine/${USER}/hgsoc/bulk"
-mkdir -p bcftools/all
-output_location="${original_location}/bcftools/all"
+mkdir -p results/bcftools/all
+output_location="${original_location}/results/bcftools/all"
 
 # Check which folder the bulk data for each sample is in
 # Dissociated Bulk
@@ -42,7 +42,7 @@ samples_230626=("2216" "2221" "2230" "2238" "2246" \
 	"2514")
 
 bam_files=()
-if ${data_type} == "diss_bulk"; then
+if [ "${data_type}" == "diss_bulk_polyA" ]; then
 	# Dissociated Bulk samples
 	for sample in ${samples_230414[@]}
 	do
@@ -54,7 +54,7 @@ if ${data_type} == "diss_bulk"; then
 		bam_files+=("${bulk_bam_location}/230418/${sample}/STAR/Aligned.sortedByCoord.out.bam")
 	done
 
-elif [ "${data_type}" == "bulk" ]; then
+elif [ "${data_type}" == "bulk_chunk_ribo" ]; then
 	# Bulk samples
 	for sample in ${samples_230509[@]}
 	do
@@ -66,7 +66,7 @@ elif [ "${data_type}" == "bulk" ]; then
 		bam_files+=("${bulk_bam_location}/230626/${sample}/STAR/Aligned.sortedByCoord.out.bam")
 	done
 else
-	echo "Invalid data type specified. Use 'diss_bulk' or 'bulk'."
+	echo "Invalid data type specified. Use 'diss_bulk_polyA' or 'bulk_chunk_ribo'."
 	exit 1
 fi
 
@@ -92,7 +92,7 @@ bcftools view \
 	-i 'DP>900' "${output_location}/bcftools_qual_filter_${data_type}_all.vcf" \
 	> "${output_location}/bcftools_qual_dp_filter_${data_type}_all.vcf"
 # Remove sample 2507 (poor quality sample)
-if [ "${data_type}" == "diss_bulk" ]; then
+if [ "${data_type}" == "diss_bulk_polyA" ]; then
 	bcftools view \
 	-s ^"230414/2507" "${output_location}/bcftools_qual_dp_filter_${data_type}_all.vcf" \
 	> "${output_location}/bcftools_qual_dp_rm_2507_filter_${data_type}_all.vcf"

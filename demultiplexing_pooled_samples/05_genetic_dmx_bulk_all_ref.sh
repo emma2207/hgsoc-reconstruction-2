@@ -39,48 +39,44 @@ else
 fi
 
 # Select the appropriate bulk VCF file based on data type
-if [ "${data_type}" == "diss_bulk" ]; then 
+if [ "${data_type}" == "diss_bulk_polyA" ]; then 
 	bulk_vcf_file=$bulk_ref_location/bulk_diss_polyA_all_samples.vcf.gz
-elif [ "${data_type}" == "bulk" ]; then 
+elif [ "${data_type}" == "bulk_chunk_ribo" ]; then 
 	bulk_vcf_file=$bulk_ref_location/bulk_chunk_ribo_all_samples.vcf.gz
 else
-	echo "Invalid data type specified. Use 'bulk' or 'diss_bulk'."
+	echo "Invalid data type specified. Use 'bulk_chunk_ribo' or 'diss_bulk_polyA'."
 	exit 1
 fi
 
-# Separate the comma-separated string of samples to exclude into an array
-IFS=',' read -ra samples <<< "$sample_ids"
+# Optionally exclude low quality samples from the bulk VCF file.
+# Each entry in samples_to_exclude is a partial name matched against the VCF sample names.
+if [ -z "$samples_to_exclude" ]; then
+	echo "No samples to exclude; using the original reference VCF."
+	filtered_bulk_vcf_file=$bulk_vcf_file
+else
+	IFS=',' read -ra samples <<< "$samples_to_exclude"
+	full_samples_to_exclude=""
+	for sample in "${samples[@]}"; do
+		echo "Excluding sample: $sample"
+		matches=$(bcftools query -l "$bulk_vcf_file" | grep -E "^HGSOC-(${sample})_" || true)
+		if [ -z "$matches" ]; then
+			echo "No VCF sample matched '${sample}'. Expected a sample starting with HGSOC-(${sample})_."
+			exit 1
+		fi
+		match_count=$(printf "%s\n" "$matches" | wc -l | tr -d ' ')
+		if [ "$match_count" -ne 1 ]; then
+			echo "Expected exactly 1 VCF sample match for '${sample}', found ${match_count}:"
+			printf "%s\n" "$matches"
+			exit 1
+		fi
+		full_samples_to_exclude+="${matches},"
+	done
+	full_samples_to_exclude="${full_samples_to_exclude%,}"
 
-# Exclude low quality samples from the bulk VCF file
-# Match sample_to_exclude (which is only a partial match) with the sample names in the VCF file and exclude it
-for sample in "${samples[@]}"; do
-	echo "Excluding sample: $sample"
-	full_sample_to_exclude=$(bcftools query -l "$bulk_vcf_file" | grep -E "^HGSOC-(${sample})_" || true)
-	full_samples_to_exclude+="$full_sample_to_exclude,"
-done
-full_samples_to_exclude="${full_samples_to_exclude%,}"  # Remove the trailing comma
-
-# full_sample_to_exclude=$(bcftools query -l "$bulk_vcf_file" | grep -E "^HGSOC-(${samples_to_exclude})_" || true)
-# concatenate full samples separate by comma
-# full_samples_to_exclude=$(printf "%s\n" "$full_samples_to_exclude" | paste -sd ',' -)
-
-if [ -z "$full_samples_to_exclude" ]; then
-	echo "No VCF sample matched samples_to_exclude=${samples_to_exclude}."
-	echo "Expected a sample starting with HGSOC-(${samples_to_exclude})_."
-	exit 1
+	filtered_bulk_vcf_file=${bulk_vcf_file%.vcf.gz}_pool${pool}_rehead.vcf.gz
+	bcftools view -s ^${full_samples_to_exclude} "$bulk_vcf_file" -Oz -o "$filtered_bulk_vcf_file"
+	bcftools index -t -f "$filtered_bulk_vcf_file"
 fi
-
-match_count=$(printf "%s\n" "$full_sample_to_exclude" | wc -l | tr -d ' ')
-if [ "$match_count" -ne 1 ]; then
-	echo "Expected exactly 1 VCF sample match for samples_to_exclude=${samples_to_exclude}, found ${match_count}."
-	echo "Matches:"
-	printf "%s\n" "$full_samples_to_exclude"
-	exit 1
-fi
-
-filtered_bulk_vcf_file=${bulk_vcf_file%.vcf.gz}_rehead.vcf.gz
-bcftools view -s ^${full_samples_to_exclude} "$bulk_vcf_file" -Oz -o "$filtered_bulk_vcf_file" 
-bcftools index -t -f "$filtered_bulk_vcf_file"
 
 # Run vireo
 vireo \
