@@ -11,8 +11,6 @@
 #SBATCH --job-name=merge_pooled_bam
 #SBATCH --output=merge_pooled_bam_%A_%a.log
 #SBATCH --error=merge_pooled_bam_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load samtools/1.16.1
 

@@ -11,8 +11,6 @@
 #SBATCH --job-name=bcftools
 #SBATCH --output=02_bcftools_%A_%a.log
 #SBATCH --error=02_bcftools_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load bcftools/1.16
 

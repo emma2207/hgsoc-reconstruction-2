@@ -11,8 +11,6 @@
 #SBATCH --job-name=vireo
 #SBATCH --output=04_vireo_%A_%a.log
 #SBATCH --error=04_vireo_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load anaconda
 conda activate vireo_install

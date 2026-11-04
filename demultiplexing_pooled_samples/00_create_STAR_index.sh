@@ -10,8 +10,6 @@
 #SBATCH --job-name=star
 #SBATCH --output=00_create_STAR_index_%J.log
 #SBATCH --error=00_create_STAR_index_%J.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load star/2.7.10b
 

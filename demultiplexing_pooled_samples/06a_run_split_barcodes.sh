@@ -10,8 +10,6 @@
 #SBATCH --job-name=split_barcodes
 #SBATCH --output=split_barcodes_%J.log
 #SBATCH --error=split_barcodes_%J.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load miniforge
 conda activate python_vireosnp_install

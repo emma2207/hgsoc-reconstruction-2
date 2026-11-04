@@ -11,8 +11,6 @@
 #SBATCH --job-name=cellranger_multi
 #SBATCH --output=01_cellranger_multi_%A_%a.log
 #SBATCH --error=01_cellranger_multi_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module use --append /projects/$USER/lmod-files
 module load cellranger/9.0.1

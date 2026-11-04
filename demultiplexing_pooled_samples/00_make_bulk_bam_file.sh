@@ -11,8 +11,6 @@
 #SBATCH --job-name=star
 #SBATCH --output=01_make_bam_file_%A_%a.log
 #SBATCH --error=01_make_bam_file_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load star/2.7.10b
 module load samtools/1.16.1

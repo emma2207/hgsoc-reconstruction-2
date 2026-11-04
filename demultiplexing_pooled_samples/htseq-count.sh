@@ -11,8 +11,6 @@
 #SBATCH --job-name=htseq-count
 #SBATCH --output=counts_%A_%a.log
 #SBATCH --error=htseq-count_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load anaconda
 conda activate htseq_install

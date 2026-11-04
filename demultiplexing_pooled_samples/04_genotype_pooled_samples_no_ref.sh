@@ -11,8 +11,6 @@
 #SBATCH --job-name=cellsnp-lite
 #SBATCH --output=03_genotype_pooled_%A_%a.log
 #SBATCH --error=03_genotype_pooled_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load anaconda
 conda activate cellsnp-lite_install

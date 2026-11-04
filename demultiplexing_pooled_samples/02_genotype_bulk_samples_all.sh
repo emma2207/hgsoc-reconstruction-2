@@ -10,8 +10,6 @@
 #SBATCH --job-name=bcftools
 #SBATCH --output=02_bcftools_%J.log
 #SBATCH --error=02_bcftools_%J.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load bcftools/1.16
 

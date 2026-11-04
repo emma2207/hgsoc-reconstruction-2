@@ -11,8 +11,6 @@
 #SBATCH --job-name=split-bam
 #SBATCH --output=split-bam_%A_%a.log
 #SBATCH --error=split-bam_%A_%a.err
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 module load miniforge
 conda activate subset-bam-install
