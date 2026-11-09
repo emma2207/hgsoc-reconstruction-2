@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from os import getcwd
 from pathlib import Path
 from parameters import TOOLS
 
@@ -83,7 +82,7 @@ def matrix_dot_plot():
 
     plt.tight_layout()
 
-    current_dir = Path(getcwd())
+    current_dir = Path(__file__).resolve().parent.parent
     output_dir = current_dir / "benchmarking" / "data" / "figures"
     output_dir.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_dir / "matrix_dot_plot.png", dpi=300)
