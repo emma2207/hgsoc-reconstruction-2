@@ -24,6 +24,7 @@ Run the tests from this directory with `python -m unittest discover -s tests -v`
 - **real_data_results.ipynb:** analyzes results from real data experiments. In any given experiment two modalities are compared and we want to check if the sample ids from those two modalities point to samples from the same patient. If not, this indicates there was a sample swap or mislabelling. 
 - **computational_burden.ipynb:** compiles the computational burden results from the HGSOC (new) real data experiment using the trace files from the Nextflow runs.
 - **dendrogram.ipynb:** creates dendrograms based on either the sample similarity heatmaps or the sample match predictions to assess how similar the results are from different tools.
+- **matrix_dot_plot.py:** creates a matrix dot plot for all benchmarked tools from an array of values. 
 
 
 ## Supporting code
