@@ -1,6 +1,7 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
+from os import getcwd
+from pathlib import Path
 from parameters import TOOLS
 
 
@@ -81,8 +82,12 @@ def matrix_dot_plot():
         spine.set_visible(False)
 
     plt.tight_layout()
-    plt.savefig("../benchmarking/data/figures/matrix_dot_plot.png", dpi=300)
-    plt.savefig("../benchmarking/data/figures/matrix_dot_plot.pdf", dpi=300)
+
+    current_dir = Path(getcwd())
+    output_dir = current_dir / "benchmarking" / "data" / "figures"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_dir / "matrix_dot_plot.png", dpi=300)
+    plt.savefig(output_dir / "matrix_dot_plot.pdf", dpi=300)
 
 
 if __name__ == "__main__":
