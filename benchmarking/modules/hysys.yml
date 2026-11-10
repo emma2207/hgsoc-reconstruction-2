@@ -4,8 +4,8 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python=2.7
-  - numpy
-  - scipy
-  - scikit-learn=0.17
-  - bcftools>=1.16
+  - python=2.7.15
+  - numpy=1.11.3
+  - scipy=1.2.1
+  - scikit-learn=0.17.1
+  - bcftools=1.17

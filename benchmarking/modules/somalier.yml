@@ -4,6 +4,6 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - somalier
-  - bcftools
-  - tabix
+  - somalier=0.3.3
+  - bcftools=1.24
+  - htslib=1.24

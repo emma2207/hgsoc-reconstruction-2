@@ -14,6 +14,11 @@ This workflow is branched into two paths: one for .vcf files getting fed into to
     - **main_uneven_pseudobulk_sizes.nf:** variation on `main_from_genotype.nf` for pseudobulk experiments where pseudobulk drawn from the size samples but with different numbers of cells are compared.
     - **main_pseudobulk_vs_sc.nf:** variation on `main_from_genotype.nf` comparing pseudobulks with single-cell (or single-nucleus) samples.
 
+## Software versions
+The Conda YAML files pin the versions of their declared dependencies to those recorded in the HPC environments used for the analysis. 
+
+The pipeline currently points processes to existing environments under `params.conda`; it does not automatically create them from these YAML files.
+
 ## Modules
 Each module specifies a nextflow process that is called in main:
 - **0_prepare_inputs.nf:** prepare input files .bam files

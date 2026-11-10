@@ -4,5 +4,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - picard=3.1
-  - bcftools
+  - picard=3.1.1
+  - bcftools=1.22

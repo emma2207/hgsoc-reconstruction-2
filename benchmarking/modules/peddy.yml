@@ -4,6 +4,6 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - peddy
-  - python>=3.7
-  - bcftools
+  - peddy=0.4.8
+  - python=3.10.20
+  - bcftools=1.24

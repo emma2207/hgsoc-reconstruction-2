@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python=2.7
-  - samtools
-  - bcftools
-  - bioconda::ngscheckmate
+  - python=2.7.15
+  - samtools=1.5
+  - bcftools=1.6
+  - bioconda::ngscheckmate=1.0.1

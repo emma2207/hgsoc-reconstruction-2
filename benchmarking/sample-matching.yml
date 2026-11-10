@@ -4,10 +4,10 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - nextflow
-  - python=3.8
-  - bcftools=1.15
-  - samtools=1.15
-  - pandas
-  - numpy
-  - vireosnp
+  - nextflow=25.10.2
+  - python=3.8.19
+  - bcftools=1.15.1
+  - samtools=1.15.1
+  - pandas=2.0.3
+  - numpy=1.24.4
+  - vireosnp=0.5.9
