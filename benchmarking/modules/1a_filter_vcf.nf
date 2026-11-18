@@ -58,11 +58,6 @@ process FILTER_VCF {
                     echo "\$sample"
                     echo "\$sample" >> "\${output_location}/\${mod}_samples_vcf.txt"
                 fi
-
-                if [[ "\$mod" == "bulk_diss_polyA" && "\$sample" == *"2507"* ]]
-                then
-                    skip_sample=\$sample
-                fi
             done
         done
 
@@ -94,20 +89,6 @@ process FILTER_VCF {
 
             # Index the filtered VCF
             bcftools index \${all_variants_output}
-
-            # Additional filter removing low quality sample 2507 from bulk_diss_polyA in hgsoc_new
-            if [[ "\$mod" ==  "bulk_diss_polyA" ]]
-            then
-                bcftools view \
-                    -Oz \
-                    -s ^"\${skip_sample}" \
-                    -o "\${output_location}/filtered_variants2_\${mod}_rd_\${mod_rd}.vcf.gz" \
-                    \${all_variants_output}
-
-                # Index the filtered VCF
-                bcftools index "\${output_location}/filtered_variants2_\${mod}_rd_\${mod_rd}.vcf.gz"
-            fi
-
         done
         
         echo "Finished splitting by modalities!"

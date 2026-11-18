@@ -10,6 +10,12 @@
 
 nextflow.enable.dsl = 2
 
+include {
+    isValidRealDataModalities;
+    validateBenchmarkParameters
+} from './modules/helpers/modality_utils'
+include { validateVcfRunPaths } from './modules/helpers/path_validation'
+
 // Import processes
 include { MERGE_AND_FILTER_VCFS } from './modules/1a_merge_vcfs'
 include { CROSSCHECK_FINGERPRINTS } from './modules/2a_fingerprints'
@@ -23,9 +29,27 @@ include { TIMEATTACKGENCOMP } from './modules/2a_timeattackgencomp'
 
 // Main workflow
 workflow {
-    // Find all bams with the listed datatypes
+    validateBenchmarkParameters(params.dataset, params.pseudobulk, params.ncells)
+
+    if (!params.pseudobulk && !isValidRealDataModalities(params.modalities)) {
+        throw new IllegalArgumentException(
+            "Real-data runs require exactly two distinct, non-empty modality names in params.modalities, one for each modality to compare. Names must not contain one another."
+        )
+    }
+
+    modalities = params.pseudobulk ? ["pseudobulk"] : params.modalities
+    def vcfPattern = params.pseudobulk
+        ? "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*.vcf.gz"
+        : "${params.vcfsDir}/${params.dataset}/real_data/ncells_null/*.vcf.gz"
+    validateVcfRunPaths(
+        params,
+        ['vireo', 'fingerprints', 'hysys', 'ngscheckmate', 'peddy', 'timeattackgencomp', 'omicsprint'],
+        ['sample VCF inputs': vcfPattern],
+        params.pseudobulk ? [] : modalities
+    )
+
+    // Find VCFs for the selected experiment
     if (!params.pseudobulk) {
-        modalities = ["bulk", "single-cell"]
         vcf_files = channel.fromPath(
         "${params.vcfsDir}/${params.dataset}/real_data/ncells_null/*.vcf.gz"
         )
@@ -35,7 +59,6 @@ workflow {
         )
         .view { x -> "Index Files: ${x}"}
     } else {
-        modalities = ["pseudobulk"]
         vcf_files = channel.fromPath(
         "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*.vcf.gz"
         )

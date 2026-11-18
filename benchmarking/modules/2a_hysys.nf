@@ -59,12 +59,9 @@ process HYSYS {
             do  
                 if [[ "\$base_name" == *"\$mod"* || ("\$mod" == "bulk_dissociated_polyA" && "\$base_name" == *"bulk_diss_polyA"*) ]]
                 then
-                    if ! [[ \$file == *"2507"* && (\$file == *"bulk_diss_polyA"* || \$file == *"bulk_dissociated_polyA"*) ]]
-                    then
-                        echo "\${output_location}/\${base_name}.snps" >> \\
-                            \${output_location}/sample_list_\${mod}.txt
-                        echo "Added \${base_name} to sample_list_\${mod}.txt"
-                    fi
+                    echo "\${output_location}/\${base_name}.snps" >> \\
+                        \${output_location}/sample_list_\${mod}.txt
+                    echo "Added \${base_name} to sample_list_\${mod}.txt"
                 fi
             done
             

@@ -10,6 +10,12 @@
 
 nextflow.enable.dsl = 2
 
+include { validateBenchmarkParameters } from './modules/helpers/modality_utils'
+include {
+    requirePositiveInteger;
+    validateVcfRunPaths
+} from './modules/helpers/path_validation'
+
 // Import processes
 include { MERGE_AND_FILTER_VCFS } from './modules/1a_merge_vcfs'
 include { CROSSCHECK_FINGERPRINTS } from './modules/2a_fingerprints'
@@ -25,6 +31,24 @@ params.outdir = "results/uneven_pseudobulk_sizes/ncells_${params.ncells_2}"
 
 // Main workflow
 workflow {
+    validateBenchmarkParameters(params.dataset, params.pseudobulk, params.ncells)
+    if (!params.pseudobulk) {
+        throw new IllegalArgumentException("main_uneven_pseudobulk_sizes.nf requires params.pseudobulk = true.")
+    }
+    requirePositiveInteger(params.ncells_2, 'params.ncells_2')
+    if (params.ncells_2 == params.ncells) {
+        throw new IllegalArgumentException("params.ncells_2 must differ from params.ncells for an uneven-size comparison.")
+    }
+
+    validateVcfRunPaths(
+        params,
+        ['vireo', 'fingerprints', 'hysys', 'ngscheckmate'],
+        [
+            set_1: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*_1.vcf.gz",
+            set_2: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells_2}/*_2.vcf.gz"
+        ]
+    )
+
     // Find all vcfs with the listed datatypes
     modalities = ["pseudobulk"]
     mod_channel = channel.fromList(modalities)

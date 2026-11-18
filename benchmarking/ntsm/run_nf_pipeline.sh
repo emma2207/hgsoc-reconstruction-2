@@ -8,8 +8,6 @@
 #SBATCH --qos=cpu-normal
 #SBATCH --mem=4G
 #SBATCH --nodes=1 
-#SBATCH --mail-user=emma.lathouwers@cuanschutz.edu
-#SBATCH --mail-type=ALL
 
 set -eo pipefail
 

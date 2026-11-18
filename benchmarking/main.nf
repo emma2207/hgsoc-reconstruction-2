@@ -8,6 +8,12 @@
 
 nextflow.enable.dsl = 2
 
+include {
+    isValidRealDataModalities;
+    validateBenchmarkParameters
+} from './modules/helpers/modality_utils'
+include { validateBamRunPaths } from './modules/helpers/path_validation'
+
 // Import processes
 include { PREPARE_INPUTS } from './modules/0_prepare_inputs'
 include { SNP_REFERENCE_INDEX } from './modules/0_snp_ref_index'
@@ -30,9 +36,30 @@ include { SOMALIER_RELATE } from './modules/2b_somalier'
 
 // Main workflow
 workflow {
+    validateBenchmarkParameters(params.dataset, params.pseudobulk, params.ncells)
+
+    if (!params.pseudobulk && !isValidRealDataModalities(params.modalities)) {
+        throw new IllegalArgumentException(
+            "Real-data runs require exactly two distinct, non-empty modality names in params.modalities, one for each modality to compare. Names must not contain one another."
+        )
+    }
+
+    modalities = params.pseudobulk ? ["pseudobulk"] : params.modalities
+    validateBamRunPaths(params, [
+        'vireo',
+        'fingerprints',
+        'hysys',
+        'ngscheckmate',
+        'peddy',
+        'timeattackgencomp',
+        'omicsprint',
+        'bamixchecker',
+        'conpair',
+        'somalier'
+    ])
+
     // Find all bams with the listed datatypes
     if (!params.pseudobulk) {
-        modalities = ["bulk_diss_polyA", "bulk_chunk_ribo"]
         bam_patterns = modalities.collect { datatype ->
             "${params.bamsDir}/${params.dataset}/${datatype}/*/Aligned.sortedByCoord.out.bam" 
         }
@@ -42,14 +69,11 @@ workflow {
             .map { f ->
                 // safe: get the last element of the parent Path as String
                 def parentName = f.parent ? f.parent.getFileName().toString() : ''
-                // datatype is in the path: .../${dataset}/${datatype}/${sample}/file.bam
-                def datatype = f.toString().contains("/${modalities[0]}/") ? modalities[0] :
-                               f.toString().contains("/${modalities[1]}/") ? modalities[1] : 'unknown'
+                def datatype = modalities.find { modality -> f.toString().contains("/${modality}/") } ?: 'unknown'
                 tuple(parentName, f.baseName, f, datatype)
             }
             .view { x -> "Found BAM files: ${x}" }
     } else {
-        modalities = ["pseudobulk"]
         bam_files = channel.fromPath("${params.pseudobulkDir}/${params.dataset}/*/pseudobulk_n_barcodes_${params.ncells}_*.bam")
             .map { f ->
                 // safe: get the last element of the parent Path as String

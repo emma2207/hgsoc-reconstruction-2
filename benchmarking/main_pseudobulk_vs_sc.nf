@@ -10,6 +10,12 @@
 
 nextflow.enable.dsl = 2
 
+include { validateBenchmarkParameters } from './modules/helpers/modality_utils'
+include {
+    requirePositiveInteger;
+    validateVcfRunPaths
+} from './modules/helpers/path_validation'
+
 // Import processes
 include { MERGE_AND_FILTER_VCFS as MERGE_PSEUDOBULK_VCFS} from './modules/1a_merge_vcfs'
 include { MERGE_AND_FILTER_VCFS as MERGE_SC_VCFS} from './modules/1a_merge_vcfs'
@@ -25,6 +31,21 @@ params.outdir = "results/pseudobulk_vs_sc"
 
 // Main workflow
 workflow {
+    validateBenchmarkParameters(params.dataset, params.pseudobulk, params.ncells)
+    if (params.pseudobulk) {
+        throw new IllegalArgumentException("main_pseudobulk_vs_sc.nf requires params.pseudobulk = false because it compares two data modes.")
+    }
+    requirePositiveInteger(params.ncells, 'params.ncells')
+
+    validateVcfRunPaths(
+        params,
+        ['vireo', 'fingerprints', 'hysys', 'ngscheckmate'],
+        [
+            single_cell: "${params.vcfsDir}/${params.dataset}/real_data/ncells_null/*_single-cell.vcf.gz",
+            pseudobulk: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*_1.vcf.gz"
+        ]
+    )
+
     sc_vcf_files = channel.fromPath(
     "${params.vcfsDir}/${params.dataset}/real_data/ncells_null/*_single-cell.vcf.gz"
     ).collect()

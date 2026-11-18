@@ -19,9 +19,9 @@ process CONPAIR_PILEUP {
         """
         set -euo pipefail
 
-        export CONPAIR_DIR=/projects/\${USER}/software/conpair
-        export GATK_JAR=/projects/\${USER}/software/anaconda/envs/conpair/opt/gatk-3.8/GenomeAnalysisTK.jar
-        export PYTHONPATH=/projects/\${USER}/software/conpair/modules
+        export CONPAIR_DIR="${params.CONPAIR}"
+        export GATK_JAR="${params.conda}/conpair/opt/gatk-3.8/GenomeAnalysisTK.jar"
+        export PYTHONPATH="${params.CONPAIR}/modules"
 
         conpair_marker_bed="${conpairMarkerBed}"
         conpair_marker_txt="${conpairMarkerTxt}"
@@ -137,9 +137,9 @@ process CONPAIR_VERIFY {
         """
         set -euo pipefail
 
-        export CONPAIR_DIR=/projects/\${USER}/software/conpair
-        export GATK_JAR=/projects/\${USER}/software/anaconda/envs/conpair/opt/gatk-3.8/GenomeAnalysisTK.jar
-        export PYTHONPATH=/projects/\${USER}/software/conpair/modules
+        export CONPAIR_DIR="${params.CONPAIR}"
+        export GATK_JAR="${params.conda}/conpair/opt/gatk-3.8/GenomeAnalysisTK.jar"
+        export PYTHONPATH="${params.CONPAIR}/modules"
 
         conpair_marker_txt="${conpairMarkerTxt}"
         conpair_min_cov=${conpairMinCov}

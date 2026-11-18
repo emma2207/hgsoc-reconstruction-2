@@ -36,15 +36,12 @@ process NGSCHECKMATE {
         # Unzip and list
         for file in ${vcf}
         do  
-            if ! [[ \$file == *"2507"* && \$file == *"bulk_diss_polyA"* ]]
-            then
-                base_name=\$(basename "\$file")
-                base_name=\${base_name%.gz}
+            base_name=\$(basename "\$file")
+            base_name=\${base_name%.gz}
 
-                gunzip -c \${file} > \${output_location}/\${base_name}
+            gunzip -c \${file} > \${output_location}/\${base_name}
                 
-                echo "\${output_location}/\${base_name}" >> \${output_location}/vcf_list.txt
-            fi
+            echo "\${output_location}/\${base_name}" >> \${output_location}/vcf_list.txt
         done
         
         # Run NGSCheckMate in VCF mode

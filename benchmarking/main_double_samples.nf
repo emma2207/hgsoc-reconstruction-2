@@ -11,6 +11,12 @@
 
 nextflow.enable.dsl = 2
 
+include { validateBenchmarkParameters } from './modules/helpers/modality_utils'
+include {
+    requirePositiveInteger;
+    validateVcfRunPaths
+} from './modules/helpers/path_validation'
+
 // Import processes
 include { MERGE_AND_FILTER_VCFS } from './modules/1a_merge_vcfs'
 include { CROSSCHECK_FINGERPRINTS } from './modules/2a_fingerprints'
@@ -27,6 +33,27 @@ params.outdir = "results/double_samples_${params.n_double_samples}/it_${params.r
 
 // Main workflow
 workflow {
+    validateBenchmarkParameters(params.dataset, params.pseudobulk, params.ncells)
+    if (!params.pseudobulk) {
+        throw new IllegalArgumentException("main_double_samples.nf requires params.pseudobulk = true.")
+    }
+    requirePositiveInteger(params.n_double_samples, 'params.n_double_samples')
+
+    def inputFiles = validateVcfRunPaths(
+        params,
+        ['vireo', 'fingerprints', 'hysys', 'ngscheckmate'],
+        [
+            set_1: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*_1.vcf.gz",
+            set_2: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*_2.vcf.gz",
+            set_3: "${params.vcfsDir}/${params.dataset}/pseudobulk/ncells_${params.ncells}/*_3.vcf.gz"
+        ]
+    )
+    if (inputFiles.set_3.size() < params.n_double_samples) {
+        throw new IllegalArgumentException(
+            "params.n_double_samples (${params.n_double_samples}) exceeds the number of set-3 VCFs (${inputFiles.set_3.size()})."
+        )
+    }
+
     // Find all vcfs with the listed datatypes
     modalities = ["pseudobulk"]
     mod_channel = channel.fromList(modalities)

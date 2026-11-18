@@ -79,10 +79,7 @@ process CROSSCHECK_FINGERPRINTS {
             bcftools reheader -h new_header.txt \$vcf_file > \$rehead_name
             bcftools sort \$rehead_name > \$sort_name
 
-            if ! [[ \$vcf_file == *"2507"* && \$vcf_file == *"bulk_diss_polyA"* ]]
-            then
-                echo "\$sort_name" >> \${output_location}/vcf_list.txt
-            fi
+            echo "\$sort_name" >> \${output_location}/vcf_list.txt
         done
         
         # Run Picard CrosscheckFingerprints

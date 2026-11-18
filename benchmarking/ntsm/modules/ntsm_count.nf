@@ -11,6 +11,7 @@ process NTSM_COUNT {
     path("counts_${modality}_${sample_name}.txt")
 
     script:
+    def sites = file(params.sites).toAbsolutePath()
     """
     set -euo pipefail
 
@@ -23,10 +24,10 @@ process NTSM_COUNT {
 
     if [ "${params.read_type}" = "single" ]
     then
-        ntsmCount -t ${task.cpus} -s ${params.sites} \
+        ntsmCount -t ${task.cpus} -s "${sites}" \
             \${output_location}/${sample_name}.R1.fastq.gz > counts_${modality}_${sample_name}.txt
     else
-        ntsmCount -t ${task.cpus} -s ${params.sites} \
+        ntsmCount -t ${task.cpus} -s "${sites}" \
             \${output_location}/${sample_name}.R1.fastq.gz \
             \${output_location}/${sample_name}.R2.fastq.gz > counts_${modality}_${sample_name}.txt
     fi
