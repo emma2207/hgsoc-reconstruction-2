@@ -12,12 +12,12 @@
 set -eo pipefail
 
 # --------------------------------------------------
-# 0) Resolve project root (directory of this script)
+# 0) Resolve project root
 # --------------------------------------------------
 # Check if SLURM_SUBMIT_DIR is set (indicates Slurm environment)
-if [ -n "${SLURM_SUBMIT_DIR}" ]; then
+if [ -n "${SLURM_SUBMIT_DIR:-}" ]; then
     # Running on HPC via Slurm
-    PRJ_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    PRJ_DIR="${SLURM_SUBMIT_DIR}"
     RUN_MODE="HPC"
     echo "Running on HPC (Slurm). Project directory: ${PRJ_DIR}"
 else

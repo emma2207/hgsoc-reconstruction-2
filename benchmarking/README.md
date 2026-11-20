@@ -217,6 +217,7 @@ nextflow run main.nf -profile slurm
 ```
 
 Adapt that config's paths and Slurm settings independently of the main benchmarking config. 
-The NTSM launch script has its own `#SBATCH` directives and module settings to adapt. 
-It currently derives its working directory from the script path even under Slurm; since Slurm may execute a copied script from a spool directory, change the HPC branch to use `SLURM_SUBMIT_DIR` and submit from `benchmarking/ntsm/` before using `sbatch`. 
+The NTSM launch script has its own `#SBATCH` directives and module settings to adapt.
+When using `sbatch`, submit from `benchmarking/ntsm/`; the script uses Slurm's
+`SLURM_SUBMIT_DIR` as its working directory.
 For local execution, its default executor is local and no profile is needed.

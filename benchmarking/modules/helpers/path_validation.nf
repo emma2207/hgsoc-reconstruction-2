@@ -145,11 +145,6 @@ def validateBamRunPaths(params, tools) {
         errors
     )
     ensureFile(params.snp_vcf, 'SNP reference VCF', errors)
-    ensureAnyFile(
-        ["${params.snp_vcf}.tbi", "${params.snp_vcf}.csi"],
-        'SNP reference VCF index',
-        errors
-    )
 
     throwValidationErrors(errors)
     bamGroups

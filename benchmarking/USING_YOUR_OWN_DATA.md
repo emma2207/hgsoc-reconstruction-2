@@ -102,7 +102,9 @@ different files or code changes for another assembly.
 
 Each workflow checks its required paths and inputs before starting processes.
 It reports unmatched input patterns, unreadable or empty input files,
-missing CSI indexes for VCFs, and missing required reference/tool files.
+missing CSI indexes for individual input VCFs, and missing required
+reference/tool files. The SNP reference VCF in `params.snp_vcf` does not
+need a pre-existing index; the pipeline prepares an indexed copy.
 It does not check Conda environment locations, contents, or executables;
 create the environments yourself and ensure the module `conda` directives
 point to them.
