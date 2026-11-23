@@ -149,8 +149,10 @@ modality names you want to compare. Both `main.nf` and
 
 There can be multiple sample directories per modality. Inputs must be
 coordinate-sorted BAMs; the pipeline indexes them. It derives the sample
-name from the parent directory and the modality from the path. Adapt the
-glob in `main.nf` if your BAMs use different names or directory layouts.
+name from the parent directory and the modality from the path. If your BAMs
+use different names or directory layouts, update both the discovery globs in
+`main.nf` and the matching patterns in `validateBamRunPaths` in
+`modules/helpers/path_validation.nf`; otherwise preflight will reject the inputs.
 
 For pseudobulk, use `params.pseudobulk = true`, set `params.ncells`, and
 arrange files like this for `params.ncells = 10000`:
